@@ -15,7 +15,6 @@ done
 
 /opt/mssql-tools/bin/sqlcmd -l 300 -S localhost -U sa -P $MSSQL_SA_PASSWORD -d master -i "/create_procedure_restoreheaderonly.sql"
 /opt/mssql-tools/bin/sqlcmd -l 300 -S localhost -U sa -P $MSSQL_SA_PASSWORD -d master -i "/create_procedure_restoredatabase.sql"
-/opt/mssql-tools/bin/sqlcmd -l 300 -S localhost -U sa -P $MSSQL_SA_PASSWORD -d master -i "/SQLtoFixBACPACExport.sql"
 #run the setup script to create the DB and the schema in the DB
 #do this in a loop because the timing for when the SQL instance is ready is indeterminate
 for f in /mnt/external/*.bak;
