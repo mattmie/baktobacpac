@@ -24,8 +24,8 @@ do
     extension="${s#*.}"
     echo "Restoring $f..."
     /opt/mssql-tools/bin/sqlcmd -l 300 -S localhost -U sa -P $MSSQL_SA_PASSWORD -d master -q "EXEC dbo.restoredatabase '/mnt/external/$name.$extension', '$name'"
-    #echo "Cleaning $f..."
-    #/opt/mssql-tools/bin/sqlcmd -l 300 -S localhost -U sa -P $MSSQL_SA_PASSWORD -d $name -i "/SQLtoFixBACPACExport.sql"
+    echo "Cleaning $f..."
+    /opt/mssql-tools/bin/sqlcmd -l 300 -S localhost -U sa -P $MSSQL_SA_PASSWORD -d $name -i "/SQLtoFixBACPACExport.sql"
     echo "Creating bacpac..."
     /sqlpackage/sqlpackage -a:"Export" -ssn:"localhost" -su:"sa" -sp:"$MSSQL_SA_PASSWORD" -sdn:"$name" -tf:"/mnt/external/$name.bacpac"
 done
