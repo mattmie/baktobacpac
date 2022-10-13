@@ -33,6 +33,5 @@ RUN chmod a+x ./create-bacpacs.sh
 
 # Switch back to mssql user and run the entrypoint script
 USER mssql
-ARG name
 ENV env_name $name
 ENTRYPOINT /bin/bash ./entrypoint.sh
