@@ -6,7 +6,7 @@ AS
 BEGIN 
 	DECLARE @restorelocation VARCHAR(255), @sql VARCHAR(MAX)
 
-	SET @restorelocation = '/var/opt/mssql/data' -- Replace with destination data folder location 
+	SET @restorelocation = '/mnt/external/sql' -- Replace with destination data folder location 
 
 	CREATE TABLE #tblBackupFiles
 		(
