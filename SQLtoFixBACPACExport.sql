@@ -29,7 +29,7 @@ SET @sql = ''
 SELECT @sql=@sql+'DROP USER ['+p.[name] +'];'
 FROM sys.database_principals p
 WHERE p.[type] = 'S'
-and p.[name] NOT IN ('dbo', 'guest', 'sys', 'INFORMATION_SCHEMA')
+and p.[name] NOT IN ('dbo', 'guest', 'sys', 'INFORMATION_SCHEMA', 'sa')
 
 EXEC(@sql)
 
