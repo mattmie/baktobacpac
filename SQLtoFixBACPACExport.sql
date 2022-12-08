@@ -9,18 +9,31 @@ EXEC(@sql)
 
 SET @sql = ''
 
-SELECT @sql=@sql+'DROP FUNCTION ['+s.[name]+'].['+o.[name] +'];'
-FROM sys.objects o
-INNER JOIN sys.schemas s ON s.schema_id = o.schema_id
-WHERE o.[type] IN ('IF', 'FN', 'FS', 'FT', 'TF') AND o.is_ms_shipped = 0
+SELECT  @sql=@sql+'ALTER TABLE ['+t.name+'] DROP CONSTRAINT ['+con.[name] +'];'
+FROM sys.check_constraints con
+INNER JOIN sys.objects t ON con.parent_object_id = t.object_id
+INNER JOIN sys.all_columns col ON con.parent_column_id = col.column_id AND  con.parent_object_id = col.object_id
 
 EXEC(@sql)
 
 SET @sql = ''
 
+SELECT @sql=@sql+'DROP FUNCTION ['+s.[name]+'].['+o.[name] +'];'
+FROM sys.objects o
+INNER JOIN sys.schemas s ON s.schema_id = o.schema_id
+LEFT OUTER JOIN sys.computed_columns cc ON cc.definition LIKE '%' + o.name + '%'
+WHERE o.[type] IN ('IF', 'FN', 'FS', 'FT', 'TF') 
+AND o.is_ms_shipped = 0
+AND cc.column_id IS NULL
+
+EXEC(@sql)
+
+
+SET @sql = ''
+
 SELECT  @sql=@sql+'ALTER AUTHORIZATION ON SCHEMA::'+s.[name]+' TO dbo;'
 FROM sys.schemas s
-WHERE s.[name] NOT IN ('dbo', 'guest', 'INFORMATION_SCHEMA', 'sys')
+WHERE s.[name] NOT IN ('dbo', 'guest', 'INFORMATION_SCHEMA', 'sys', 'sa')
 
 EXEC(@sql)
 
@@ -28,14 +41,14 @@ SET @sql = ''
 
 SELECT @sql=@sql+'DROP USER ['+p.[name] +'];'
 FROM sys.database_principals p
-WHERE p.[type] = 'S'
+WHERE p.[type] IN ('S', 'G', 'U')
 and p.[name] NOT IN ('dbo', 'guest', 'sys', 'INFORMATION_SCHEMA', 'sa')
 
 EXEC(@sql)
 
 SET @sql = ''
 
-SELECT @sql=@sql+'sp_droprolemember ['+r.[name]+'], ['+m.[name]+'];'
+SELECT @sql=@sql+'EXEC sp_droprolemember ['+r.[name]+'], ['+m.[name]+'];'
 FROM sys.database_role_members rm
     JOIN sys.database_principals r ON rm.role_principal_id = r.principal_id
     JOIN sys.database_principals m ON rm.member_principal_id = m.principal_id
@@ -76,6 +89,15 @@ BEGIN
 	SELECT @sql=@sql+'DROP ASSEMBLY  ['+a.[name] +'];'
 	FROM sys.assemblies a
 	WHERE a.is_user_defined = 1
+
+	EXEC(@sql)
 END
+
+SET @sql = ''
+
+SELECT @sql=@sql+'DROP SYNONYM ['+s.[name]+'].['+o.[name] +'];'
+FROM sys.objects o
+INNER JOIN sys.schemas s ON s.[schema_id] = o.[schema_id]
+WHERE [type] = 'SN'
 
 EXEC(@sql)
