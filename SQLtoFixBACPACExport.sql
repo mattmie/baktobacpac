@@ -9,6 +9,14 @@ EXEC(@sql)
 
 SET @sql = ''
 
+SELECT @sql=@sql+'DROP TRIGGER ['+s.[name]+'].['+o.[name] +'];'
+FROM sys.objects o
+INNER JOIN sys.schemas s ON s.[schema_id] = o.[schema_id]
+WHERE [type] = 'TR'
+EXEC(@sql)
+
+SET @sql = ''
+
 SELECT  @sql=@sql+'ALTER TABLE ['+t.name+'] DROP CONSTRAINT ['+con.[name] +'];'
 FROM sys.check_constraints con
 INNER JOIN sys.objects t ON con.parent_object_id = t.object_id
@@ -99,5 +107,22 @@ SELECT @sql=@sql+'DROP SYNONYM ['+s.[name]+'].['+o.[name] +'];'
 FROM sys.objects o
 INNER JOIN sys.schemas s ON s.[schema_id] = o.[schema_id]
 WHERE [type] = 'SN'
+
+EXEC(@sql)
+
+SET @sql = ''
+
+SELECT @sql=@sql+'EXEC sp_rename ''['+ s.[name] +'].[' + t.[name] + ']'', ''['+ s.[name] +'].[' + t.[name] + 'Custom]'', ''USERDATATYPE'';'
+FROM sys.types t
+INNER JOIN sys.schemas s ON s.schema_id = t.schema_id
+WHERE
+	s.[name] != 'sys'
+	AND t.[name] IN (
+		SELECT t.[name]
+		FROM sys.types t
+		INNER JOIN sys.schemas s ON s.schema_id = t.schema_id
+		WHERE
+			s.[name] = 'sys'
+	)
 
 EXEC(@sql)
