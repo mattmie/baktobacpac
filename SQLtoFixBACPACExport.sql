@@ -121,14 +121,14 @@ BEGIN
 	DECLARE assemblyCursor CURSOR FOR SELECT [name] FROM sys.assemblies a WHERE a.is_user_defined = 1
 	
 	OPEN assemblyCursor  
-	FETCH NEXT FROM vend_cursor INTO @name
+	FETCH NEXT FROM assemblyCursor INTO @name
 
 	WHILE @@FETCH_STATUS = 0  
 	BEGIN
 		SET @sql = 'DROP ASSEMBLY  ['+ @name +'];'
 		EXEC(@sql)
 
-		FETCH NEXT FROM vend_cursor INTO @name
+		FETCH NEXT FROM assemblyCursor INTO @name
 	END
 
 	CLOSE assemblyCursor
